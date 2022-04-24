@@ -1,0 +1,19 @@
+{
+  "manifest_version": 2,
+  "name": "Adult Content Blocker",
+  "version": "0.1.1",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["Content.js"]
+    }
+  ],
+  "icons": { "48": "icon48-1.jpg", "128": "icon48-1.jpg" },
+  "browser_action": {
+    "default_popup": "Popup.html",
+    "default_title": "Adult Content Blocker"
+  },
+  "permissions": [
+    "https://www.pornhub.com/*"
+  ]
+}
