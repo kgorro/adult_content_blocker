@@ -251,18 +251,57 @@ const generateHTML = (pageName) => {
   </div>
    `;
 };
+var images = [],
+    image_parents = [];
 
-switch (window.location.hostname) {
-  case "www.pornhub.com":
-    document.head.innerHTML = generateSTYLES();
-    document.body.innerHTML = generateHTML("Pornhub");
-    break;
-  case "www.xvideos.com":
-    document.head.innerHTML = generateSTYLES();
-    document.body.innerHTML = generateHTML("Xvideos");
-    break;
-  case "www.youjizz.com":
-    document.head.innerHTML = generateSTYLES();
-    document.body.innerHTML = generateHTML("Youjizz");
-    break;
+function AfterDomLoaded() {
+  var body = document.body;
+  var elements = document.body.getElementsByTagName("*");
+
+  /* When the DOM is ready find all the images and background images
+      initially loaded */
+  Array.prototype.forEach.call( elements, function ( el ) {
+      var style = window.getComputedStyle( el, false );
+      //alert(elements);
+      if ( el.tagName === "IMG" ) {
+          images.push( el.src ); // save image src
+          image_parents.push( el.parentNode ); // save image parent
+      } 
+    });
+  
+    /* MutationObserver callback to add images when the body changes */
+    var callback = function( mutationsList, observer ){
+      for( var mutation of mutationsList ) {
+              if ( mutation.type == 'childList' ) {
+                  Array.prototype.forEach.call( mutation.target.children, function ( child ) {
+                      var style = child.currentStyle || window.getComputedStyle(child, false);
+                      if ( child.tagName === "IMG" ) {
+                          images.push( child.src ); // save image src
+                          image_parents.push( child.parentNode ); // save image parent
+                      }
+                  } );
+              }
+      }
+    }
+
+    var observer = new MutationObserver( callback );
+    var config = { characterData: true,
+                attributes: false,
+                childList: true,
+                subtree: true };
+
+    observer.observe( body, config );
+    images.forEach(async (elem) => {
+      //alert(JSON.stringify(elem));
+      const image = await fetch(elem);
+      const imageBlog = await image.blob();
+      const imageURL = URL.createObjectURL(imageBlog);
+      console.log(elem);
+    });
+}
+
+if(document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', AfterDomLoaded);
+} else {
+  AfterDomLoaded();
 }
